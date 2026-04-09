@@ -55,6 +55,9 @@ def coerce_numeric(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     """Coerce columns to numeric; failures become NaN with a logged warning."""
     df = df.copy()
     for col in columns:
+        if col not in df.columns:
+            log.warning("numeric_coercion_missing_column", column=col)
+            continue
         before_null = df[col].isna().sum()
         df[col] = pd.to_numeric(df[col], errors="coerce")
         after_null = df[col].isna().sum()
