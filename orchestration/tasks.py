@@ -52,13 +52,25 @@ def load_to_raw(name: str, df: pd.DataFrame) -> int:
     """Truncate and bulk-COPY a cleaned DataFrame into the raw schema."""
     columns = {
         "installations": [
-            "installation_id", "name", "country_code", "sector", "latitude", "longitude",
+            "installation_id",
+            "name",
+            "country_code",
+            "sector",
+            "latitude",
+            "longitude",
         ],
         "emissions": [
-            "installation_id", "year", "activity_type", "verified_tonnes", "reporting_date",
+            "installation_id",
+            "year",
+            "activity_type",
+            "verified_tonnes",
+            "reporting_date",
         ],
         "allowances": [
-            "installation_id", "year", "allocated_tonnes", "surrendered_tonnes",
+            "installation_id",
+            "year",
+            "allocated_tonnes",
+            "surrendered_tonnes",
         ],
     }[name]
     table = f"raw.{name}"
@@ -78,7 +90,9 @@ def load_country_codes() -> int:
         with conn.cursor() as cur:
             cur.executemany(
                 "INSERT INTO raw.country_codes (country_code, country_name, population) VALUES (%s, %s, %s)",
-                df[["country_code", "country_name", "population"]].itertuples(index=False, name=None),
+                df[["country_code", "country_name", "population"]].itertuples(
+                    index=False, name=None
+                ),
             )
         conn.commit()
     return len(df)

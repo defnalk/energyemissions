@@ -24,9 +24,36 @@ SECTORS = [
     "Ceramics",
 ]
 COUNTRIES = [
-    "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
-    "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL",
-    "PL", "PT", "RO", "SK", "SI", "ES", "SE", "NO", "IS", "LI",
+    "AT",
+    "BE",
+    "BG",
+    "HR",
+    "CY",
+    "CZ",
+    "DK",
+    "EE",
+    "FI",
+    "FR",
+    "DE",
+    "GR",
+    "HU",
+    "IE",
+    "IT",
+    "LV",
+    "LT",
+    "LU",
+    "MT",
+    "NL",
+    "PL",
+    "PT",
+    "RO",
+    "SK",
+    "SI",
+    "ES",
+    "SE",
+    "NO",
+    "IS",
+    "LI",
 ]
 YEARS = list(range(2013, 2024))
 
@@ -77,9 +104,7 @@ def generate(out_dir: Path, n_installations: int = 5000, seed: int = 42) -> None
 
     with (out_dir / "allowances.csv").open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(
-            ["installation_id", "year", "allocated_tonnes", "surrendered_tonnes"]
-        )
+        writer.writerow(["installation_id", "year", "allocated_tonnes", "surrendered_tonnes"])
         for inst in installations:
             base = rng.uniform(5_000, 2_000_000)
             for year in YEARS:

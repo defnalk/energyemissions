@@ -28,7 +28,9 @@ prev = df[df["year"] == latest_year - 1]
 
 c1, c2, c3, c4 = st.columns(4)
 with c1:
-    kpi_card("Total emissions (latest yr, Mt)", f"{latest['total_emissions_tonnes'].sum() / 1e6:,.1f}")
+    kpi_card(
+        "Total emissions (latest yr, Mt)", f"{latest['total_emissions_tonnes'].sum() / 1e6:,.1f}"
+    )
 with c2:
     yoy = (
         (latest["total_emissions_tonnes"].sum() - prev["total_emissions_tonnes"].sum())

@@ -33,9 +33,7 @@ fig = px.scatter(
     title="Allocated vs surrendered allowances",
 )
 mx = float(max(df["allocated_tonnes"].max(), df["surrendered_tonnes"].max()))
-fig.add_trace(
-    go.Scatter(x=[0, mx], y=[0, mx], mode="lines", name="parity", line={"dash": "dash"})
-)
+fig.add_trace(go.Scatter(x=[0, mx], y=[0, mx], mode="lines", name="parity", line={"dash": "dash"}))
 st.plotly_chart(fig, use_container_width=True)
 st.caption("Above the line = surplus allowances; below = deficit (over-emission).")
 st.dataframe(df, use_container_width=True)

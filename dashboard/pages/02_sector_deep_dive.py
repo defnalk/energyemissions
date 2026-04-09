@@ -28,7 +28,11 @@ if df.empty:
 
 agg = df.groupby(["sector", "year"], as_index=False)["total_emissions_tonnes"].sum()
 fig = px.line(
-    agg, x="year", y="total_emissions_tonnes", color="sector", markers=True,
+    agg,
+    x="year",
+    y="total_emissions_tonnes",
+    color="sector",
+    markers=True,
     title="Sector emissions over time",
 )
 st.plotly_chart(fig, use_container_width=True)

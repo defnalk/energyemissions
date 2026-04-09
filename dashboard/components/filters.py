@@ -24,9 +24,7 @@ def sidebar_filters() -> dict[str, object]:
     selected_countries = st.sidebar.multiselect(
         "Countries", countries["country_code"].tolist(), default=[]
     )
-    selected_sectors = st.sidebar.multiselect(
-        "Sectors", sectors["sector"].tolist(), default=[]
-    )
+    selected_sectors = st.sidebar.multiselect("Sectors", sectors["sector"].tolist(), default=[])
 
     state = {
         "year_range": year_range,

@@ -50,9 +50,7 @@ def coerce_numeric(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
         df[col] = pd.to_numeric(df[col], errors="coerce")
         after_null = df[col].isna().sum()
         if after_null > before_null:
-            log.warning(
-                "numeric_coercion_loss", column=col, lost=int(after_null - before_null)
-            )
+            log.warning("numeric_coercion_loss", column=col, lost=int(after_null - before_null))
     return df
 
 
@@ -86,9 +84,7 @@ def clean_emissions(df: pd.DataFrame) -> pd.DataFrame:
 def clean_allowances(df: pd.DataFrame) -> pd.DataFrame:
     """Apply the full allowances cleaning pipeline."""
     df = coerce_numeric(df, ["allocated_tonnes", "surrendered_tonnes", "year"])
-    df = df.dropna(
-        subset=["installation_id", "year", "allocated_tonnes", "surrendered_tonnes"]
-    )
+    df = df.dropna(subset=["installation_id", "year", "allocated_tonnes", "surrendered_tonnes"])
     df["year"] = df["year"].astype(int)
     df = df.drop_duplicates(subset=["installation_id", "year"], keep="last").reset_index(drop=True)
     return df
