@@ -46,8 +46,8 @@ with c4:
 st.subheader(f"Emissions by country ({latest_year})")
 fig = px.choropleth(
     latest,
-    locations="country_code",
-    locationmode="ISO-3",
+    locations="country_name",
+    locationmode="country names",
     color="total_emissions_tonnes",
     hover_name="country_name",
     scope="europe",

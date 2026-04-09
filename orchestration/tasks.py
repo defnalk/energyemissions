@@ -8,15 +8,12 @@ from datetime import timedelta
 import pandas as pd
 import structlog
 from prefect import task
-from prefect.cache_policies import INPUTS
 
 from ingest import loaders, sources
 from ingest.schemas import AllowanceSchema, EmissionSchema, InstallationSchema
 from transform import clean
 
 log = structlog.get_logger(__name__)
-
-CACHE_24H = INPUTS.configure(key_storage=None) if hasattr(INPUTS, "configure") else INPUTS
 
 
 @task(retries=3, retry_delay_seconds=60, cache_expiration=timedelta(hours=24), tags=["ingest"])

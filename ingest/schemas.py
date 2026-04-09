@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-import pandera.pandas as pa
+try:
+    import pandera.pandas as pa
+except ImportError:  # pandera < 0.22
+    import pandera as pa  # type: ignore[no-redef]
 from pandera.typing import Series
 
 COUNTRIES = [
