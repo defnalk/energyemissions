@@ -12,6 +12,7 @@ from prefect import task
 from ingest import loaders, sources
 from ingest.schemas import AllowanceSchema, EmissionSchema, InstallationSchema
 from transform import clean
+from transform.forecast import detect_anomalies, forecast_country_emissions
 
 log = structlog.get_logger(__name__)
 
@@ -113,3 +114,57 @@ def run_dbt(command: str) -> None:
     if result.returncode != 0:
         log.error("dbt_failed", stderr=result.stderr[-2000:])
         raise RuntimeError(f"dbt {command} failed: {result.stderr[-500:]}")
+
+
+@task(retries=2, retry_delay_seconds=30, tags=["transform", "ml"])
+def build_forecast_and_anomalies() -> tuple[int, int]:
+    """Read mart_country_emissions, fit per-country forecasts, flag anomalies.
+
+    Writes results to ``mart.mart_emissions_forecast`` and
+    ``mart.mart_emissions_anomalies``. Returns ``(forecast_rows, anomaly_rows)``.
+    """
+    with loaders.get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "select country_code, year, total_emissions_tonnes from mart.mart_country_emissions"
+        )
+        rows = cur.fetchall()
+    history = pd.DataFrame(rows, columns=["country_code", "year", "total_emissions_tonnes"])
+    log.info("forecast_input", rows=len(history))
+
+    forecast = forecast_country_emissions(history)
+    anomalies = detect_anomalies(history)
+
+    with loaders.get_conn() as conn:
+        loaders.truncate(conn, "mart.mart_emissions_forecast")
+        loaders.truncate(conn, "mart.mart_emissions_anomalies")
+        if not forecast.empty:
+            loaders.copy_dataframe(
+                conn,
+                forecast,
+                "mart.mart_emissions_forecast",
+                ["country_code", "year", "forecast_tonnes", "lower_band", "upper_band", "model"],
+                source_file="forecast_task",
+            )
+        if not anomalies.empty:
+            with conn.cursor() as cur:
+                cur.executemany(
+                    "INSERT INTO mart.mart_emissions_anomalies "
+                    "(country_code, year, total_emissions_tonnes, yoy_pct, z_score, severity) "
+                    "VALUES (%s, %s, %s, %s, %s, %s)",
+                    list(
+                        anomalies[
+                            [
+                                "country_code",
+                                "year",
+                                "total_emissions_tonnes",
+                                "yoy_pct",
+                                "z_score",
+                                "severity",
+                            ]
+                        ].itertuples(index=False, name=None)
+                    ),
+                )
+        conn.commit()
+
+    log.info("forecast_done", forecast_rows=len(forecast), anomaly_rows=len(anomalies))
+    return len(forecast), len(anomalies)

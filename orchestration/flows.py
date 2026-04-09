@@ -11,6 +11,7 @@ from prefect import flow
 
 from orchestration.alerts import send_alert
 from orchestration.tasks import (
+    build_forecast_and_anomalies,
     clean_table,
     download_source,
     load_country_codes,
@@ -42,6 +43,10 @@ def energy_pipeline() -> dict[str, int]:
 
         run_dbt("deps")
         run_dbt("build --target dev")
+
+        forecast_rows, anomaly_rows = build_forecast_and_anomalies()
+        loaded["forecast"] = forecast_rows
+        loaded["anomalies"] = anomaly_rows
         return loaded
     except Exception as exc:
         send_alert(

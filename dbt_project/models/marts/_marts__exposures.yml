@@ -1,0 +1,26 @@
+version: 2
+
+exposures:
+  - name: streamlit_dashboard
+    type: dashboard
+    maturity: high
+    url: http://localhost:8501
+    description: "EU ETS multi-page Streamlit dashboard."
+    depends_on:
+      - ref('mart_country_emissions')
+      - ref('mart_sector_trends')
+      - ref('mart_top_emitters')
+      - ref('mart_compliance_gap')
+    owner:
+      name: data-platform
+      email: data@example.com
+
+  - name: emissions_forecast_model
+    type: ml
+    maturity: medium
+    description: "OLS-based per-country forecast + rolling z-score anomaly detection. Built by orchestration.tasks.build_forecast_and_anomalies and stored in mart.mart_emissions_forecast / mart.mart_emissions_anomalies."
+    depends_on:
+      - ref('mart_country_emissions')
+    owner:
+      name: data-platform
+      email: data@example.com
