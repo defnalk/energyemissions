@@ -24,4 +24,5 @@ def add_per_capita(
 
 def sector_rollup(df: pd.DataFrame, value: str = "verified_tonnes") -> pd.DataFrame:
     """Aggregate emissions by (sector, year)."""
-    return df.groupby(["sector", "year"], as_index=False)[value].sum()
+    result = df.groupby(["sector", "year"], as_index=False)[value].sum()
+    return pd.DataFrame(result)
