@@ -36,7 +36,16 @@ def normalize_units(df: pd.DataFrame, value_col: str, unit_col: str = "unit") ->
     df = df.copy()
     if unit_col not in df.columns:
         return df
-    factors = df[unit_col].map(UNIT_FACTORS).fillna(1.0)
+    mapped = df[unit_col].map(UNIT_FACTORS)
+    unknown_mask = mapped.isna() & df[unit_col].notna()
+    if unknown_mask.any():
+        unknown_units = sorted({str(u) for u in df.loc[unknown_mask, unit_col].unique()})
+        log.warning(
+            "normalize_units_unknown",
+            unknown=unknown_units,
+            rows=int(unknown_mask.sum()),
+        )
+    factors = mapped.fillna(1.0)
     df[value_col] = df[value_col] * factors
     df = df.drop(columns=[unit_col])
     return df
