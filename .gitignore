@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dbt_project/target/
+dbt_project/dbt_packages/
+dbt_project/logs/
+warehouse/seed/data/
+*.egg-info/

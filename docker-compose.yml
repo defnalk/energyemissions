@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-energy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-energy}
+      POSTGRES_DB: ${POSTGRES_DB:-energy}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./warehouse/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-energy}"]
+      interval: 5s
+      retries: 10
+
+  prefect-server:
+    image: prefecthq/prefect:3-latest
+    command: prefect server start --host 0.0.0.0
+    ports:
+      - "4200:4200"
+    environment:
+      PREFECT_SERVER_API_HOST: 0.0.0.0
+      PREFECT_API_URL: http://localhost:4200/api
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  prefect-worker:
+    build: .
+    command: tail -f /dev/null
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-energy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-energy}
+      POSTGRES_DB: ${POSTGRES_DB:-energy}
+      DBT_PROFILES_DIR: /app/dbt_project
+    volumes:
+      - ./:/app
+    working_dir: /app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      prefect-server:
+        condition: service_started
+
+  streamlit:
+    build: .
+    command: streamlit run dashboard/app.py --server.address 0.0.0.0 --server.port 8501
+    ports:
+      - "8501:8501"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-energy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-energy}
+      POSTGRES_DB: ${POSTGRES_DB:-energy}
+    volumes:
+      - ./:/app
+    working_dir: /app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
