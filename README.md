@@ -1,5 +1,7 @@
 # EU ETS Emissions Pipeline
 
+[![CI](https://github.com/defnalk/energyemissions/actions/workflows/ci.yml/badge.svg)](https://github.com/defnalk/energyemissions/actions/workflows/ci.yml)
+
 A production-grade ETL pipeline for EU Emissions Trading System data:
 **Pandera-validated ingest → Postgres `raw` → dbt staging/intermediate/marts →
 Streamlit dashboard**, orchestrated by Prefect, packaged in Docker Compose,
