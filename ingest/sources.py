@@ -30,11 +30,18 @@ def _ensure_local_sample() -> None:
 
 
 def _download(url: str, dest: Path) -> Path:
-    """Download a CSV to ``dest`` with a 60s timeout."""
+    """Download a CSV to ``dest`` with a 60s timeout.
+
+    Writes to a sibling ``.part`` file first and only renames on success,
+    so a partial or failed download never clobbers an existing cached
+    copy that we may want to fall back to.
+    """
     log.info("downloading", url=url)
     resp = requests.get(url, timeout=60)
     resp.raise_for_status()
-    dest.write_bytes(resp.content)
+    tmp = dest.with_suffix(dest.suffix + ".part")
+    tmp.write_bytes(resp.content)
+    tmp.replace(dest)
     return dest
 
 
