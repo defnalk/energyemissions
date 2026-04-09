@@ -112,8 +112,18 @@ def run_dbt(command: str) -> None:
     )
     log.info("dbt_stdout", out=result.stdout[-2000:])
     if result.returncode != 0:
-        log.error("dbt_failed", stderr=result.stderr[-2000:])
-        raise RuntimeError(f"dbt {command} failed: {result.stderr[-500:]}")
+        # dbt writes test failures and model errors to stdout, not stderr,
+        # so surface both streams when the command fails.
+        log.error(
+            "dbt_failed",
+            returncode=result.returncode,
+            stdout=result.stdout[-2000:],
+            stderr=result.stderr[-2000:],
+        )
+        raise RuntimeError(
+            f"dbt {command} failed (rc={result.returncode}): "
+            f"{(result.stderr or result.stdout)[-500:]}"
+        )
 
 
 @task(retries=2, retry_delay_seconds=30, tags=["transform", "ml"])
