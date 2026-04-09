@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: mart_country_emissions
+    description: "Country-level annual emissions with YoY and per-capita."
+    columns:
+      - name: country_code
+        description: "ISO 3166-1 alpha-2."
+        tests: [not_null]
+      - name: year
+        tests: [not_null]
+      - name: total_emissions_tonnes
+        description: "Sum of verified emissions for the country and year, in tonnes CO2e."
+      - name: emissions_per_capita
+        description: "Total emissions divided by population."
+      - name: yoy_pct_change
+        description: "Percent change vs prior year."
+
+  - name: mart_sector_trends
+    description: "Sector-level annual time series, optionally filterable by country."
+    columns:
+      - name: sector
+        tests: [not_null]
+      - name: year
+        tests: [not_null]
+      - name: total_emissions_tonnes
+
+  - name: mart_top_emitters
+    description: "Top 100 installations by emissions per year."
+    columns:
+      - name: installation_id
+        tests: [not_null]
+      - name: rank_in_year
+        tests: [not_null]
+
+  - name: mart_compliance_gap
+    description: "Allocated minus verified emissions per country and year."
+    columns:
+      - name: country_code
+        tests: [not_null]
+      - name: compliance_gap_tonnes
+        description: "Positive = surplus allowances, negative = deficit."

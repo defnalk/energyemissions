@@ -1,0 +1,44 @@
+version: 2
+
+sources:
+  - name: raw
+    database: "{{ env_var('POSTGRES_DB', 'energy') }}"
+    schema: raw
+    description: "Raw EU ETS data loaded by the ingest layer."
+    freshness:
+      warn_after: {count: 7, period: day}
+      error_after: {count: 30, period: day}
+    loaded_at_field: _loaded_at
+    tables:
+      - name: installations
+        description: "One row per ETS-regulated installation."
+        columns:
+          - name: installation_id
+            description: "EUTL installation ID."
+            tests: [not_null, unique]
+          - name: country_code
+            description: "ISO 3166-1 alpha-2 code."
+            tests: [not_null]
+          - name: sector
+            tests: [not_null]
+      - name: emissions
+        description: "Annual verified emissions in tonnes CO2e."
+        columns:
+          - name: installation_id
+            tests: [not_null]
+          - name: year
+            tests: [not_null]
+          - name: verified_tonnes
+            tests: [not_null]
+      - name: allowances
+        description: "Annual allocated and surrendered allowances."
+        columns:
+          - name: installation_id
+            tests: [not_null]
+          - name: year
+            tests: [not_null]
+      - name: country_codes
+        description: "ISO country lookup with population."
+        columns:
+          - name: country_code
+            tests: [not_null, unique]
