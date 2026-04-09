@@ -125,7 +125,10 @@ def detect_anomalies(history: pd.DataFrame, config: ForecastConfig | None = None
     df["z_score"] = (df["yoy_pct"] - rolling_mean) / rolling_std.replace(0, np.nan)
 
     anomalies = df[df["z_score"].abs() > cfg.anomaly_z_threshold].copy()
-    anomalies["severity"] = np.where(anomalies["z_score"].abs() > 4.0, "critical", "warning")
+    critical_threshold = cfg.anomaly_z_threshold * 1.6
+    anomalies["severity"] = np.where(
+        anomalies["z_score"].abs() > critical_threshold, "critical", "warning"
+    )
     return anomalies[
         ["country_code", "year", "total_emissions_tonnes", "yoy_pct", "z_score", "severity"]
     ].reset_index(drop=True)
