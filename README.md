@@ -2,10 +2,10 @@
 
 [![CI](https://github.com/defnalk/energyemissions/actions/workflows/ci.yml/badge.svg)](https://github.com/defnalk/energyemissions/actions/workflows/ci.yml)
 
-A production-grade ETL pipeline for EU Emissions Trading System data:
-**Pandera-validated ingest → Postgres `raw` → dbt staging/intermediate/marts →
+A production grade ETL pipeline for EU Emissions Trading System data:
+**Pandera validated ingest → Postgres `raw` → dbt staging/intermediate/marts →
 Streamlit dashboard**, orchestrated by Prefect, packaged in Docker Compose,
-and tested end-to-end against an ephemeral Postgres via testcontainers.
+and tested end to end against an ephemeral Postgres via testcontainers.
 
 ## Architecture
 
@@ -42,11 +42,11 @@ Open:
 
 ## Data source
 
-The pipeline reads the public EU ETS verified-emissions dataset from the
+The pipeline reads the public EU ETS verified emissions dataset from the
 European Environment Agency
 ([data hub](https://www.eea.europa.eu/en/datahub/datahubitem-view/9d04d6c1-d8cf-44ff-aa5e-c1c5f8c7c9de)).
 Because that URL is unstable, the repo also bundles a deterministic
-~50k-row synthetic sample (`warehouse/seed/generate_sample.py`) matching the
+~50k row synthetic sample (`warehouse/seed/generate_sample.py`) matching the
 EUTL schema. Toggle with `USE_LOCAL_FALLBACK=true|false`.
 
 ## Layout
@@ -66,14 +66,14 @@ tests/         # pytest with testcontainers Postgres
 - **Monitoring**: Prometheus exporter on the Prefect worker; Grafana
   dashboards on flow duration, row counts, and `raw.rejected_rows` growth;
   PagerDuty alerts driven by `orchestration.alerts.send_alert`.
-- **CDC**: switch from full truncate-and-load to Debezium-based change data
+- **CDC**: switch from full truncate and load to Debezium based change data
   capture against the upstream EUTL Postgres mirror, materialised into
   partitioned `raw.*` tables.
-- **Partitioning**: time-partition `raw.emissions` and `mart.*` by `year`
+- **Partitioning**: time partition `raw.emissions` and `mart.*` by `year`
   with declarative partitioning; convert dbt marts to incremental on
   `(installation_id, year)`.
 - **RBAC**: separate Postgres roles for `etl_writer` (raw + staging),
-  `analyst` (mart read-only), and `app` (mart read-only with row-level
+  `analyst` (mart read only), and `app` (mart read only with row level
   security on `country_code` for tenant scoping).
 - **Secrets**: pull DB credentials from Vault / AWS Secrets Manager via the
   Prefect block system rather than `.env`.
